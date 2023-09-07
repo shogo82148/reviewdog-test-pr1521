@@ -1,0 +1,22 @@
+name: reviewdog
+on:
+  pull_request:
+
+jobs:
+  golint:
+    name: golint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+      - run: |
+          go install golang.org/x/lint/golint@latest
+          go install github.com/reviewdog/reviewdog/cmd/reviewdog@c1362827ff8b1a74656b2265b41ae86e0874234f
+          golint ./... | reviewdog -reporter=github-pr-review -f=golint
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
